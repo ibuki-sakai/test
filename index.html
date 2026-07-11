@@ -3,53 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>富岳防衛作戦 - R-CCS Emergency System</title>
+    <title>富岳サイバー防衛戦 - R-CCS Emergency Operations</title>
     <style>
         body {
             background-color: #0d1117;
             color: #58a6ff;
-            font-family: 'Courier New', Courier, monospace, "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+            font-family: 'Courier New', Courier, monospace, "Helvetica Neue", Arial, sans-serif;
             padding: 20px;
             margin: 0;
         }
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             background-color: #161b22;
             border: 1px solid #30363d;
-            border-radius: 6px;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
         }
         h1 {
             color: #f0f6fc;
             border-bottom: 2px solid #238636;
             padding-bottom: 10px;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             text-align: center;
+            margin-top: 0;
         }
         .status-bar {
             display: flex;
             justify-content: space-between;
             background-color: #21262d;
-            padding: 10px;
+            padding: 12px;
             border-radius: 4px;
             margin-bottom: 20px;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            border-left: 4px solid #388bfd;
         }
         .status-critical { color: #f85149; font-weight: bold; }
+        .status-warn { color: #d29922; font-weight: bold; }
         .status-ok { color: #56d364; }
         #console {
             background-color: #010409;
             border: 1px solid #30363d;
-            padding: 15px;
+            padding: 20px;
             border-radius: 4px;
-            height: 300px;
+            height: 400px;
             overflow-y: auto;
             margin-bottom: 20px;
             white-space: pre-wrap;
-            line-height: 1.5;
+            line-height: 1.6;
             color: #c9d1d9;
+            font-size: 0.95rem;
         }
         .choice-btn {
             display: block;
@@ -57,8 +61,8 @@
             background-color: #21262d;
             color: #c9d1d9;
             border: 1px solid #30363d;
-            padding: 12px;
-            margin-bottom: 10px;
+            padding: 14px;
+            margin-bottom: 12px;
             border-radius: 6px;
             text-align: left;
             cursor: pointer;
@@ -69,18 +73,21 @@
             background-color: #30363d;
             border-color: #8b949e;
             color: #f0f6fc;
+            transform: translateX(5px);
         }
-        .system-alert { color: #f85149; font-weight: bold; animation: blink 1s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        .system-alert { color: #f85149; font-weight: bold; animation: blink 1.2s infinite; }
+        .highlight-blue { color: #58a6ff; font-weight: bold; }
+        .highlight-green { color: #56d364; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>[R-CCS] スーパーコンピュータ富岳・緊急防衛システム</h1>
+    <h1>[R-CCS] スーパーコンピュータ富岳・インシデントコマンド</h1>
     
     <div class="status-bar">
-        <div>担当職位: <span style="color:#ff7b72;">テクニカルスタッフⅠ（現場指揮官）</span></div>
+        <div>職位: <span style="color:#ff7b72; font-weight:bold;">テクニカルスタッフⅠ (現場指揮官)</span></div>
         <div>富岳ステータス: <span id="fugaku-status" class="status-ok">正常稼働中</span></div>
     </div>
 
@@ -93,7 +100,7 @@ const consoleLog = document.getElementById('console');
 const choicesDiv = document.getElementById('choices');
 const statusSpan = document.getElementById('fugaku-status');
 
-function typeLog(text, delay = 0) {
+function typeLog(text) {
     const p = document.createElement('p');
     p.innerHTML = text;
     consoleLog.appendChild(p);
@@ -104,6 +111,11 @@ function clearChoices() {
     choicesDiv.innerHTML = '';
 }
 
+function updateStatus(text, className) {
+    statusSpan.innerText = text;
+    statusSpan.className = className;
+}
+
 function addChoice(text, nextStepFunc) {
     const btn = document.createElement('button');
     btn.className = 'choice-btn';
@@ -112,75 +124,140 @@ function addChoice(text, nextStepFunc) {
     choicesDiv.appendChild(btn);
 }
 
-// ーーー ゲームシナリオ ーーー
+// ーーーーー シナリオデータ ーーーーー
 
 function startGame() {
     consoleLog.innerHTML = '';
     clearChoices();
-    statusSpan.innerText = "正常稼働中";
-    statusSpan.className = "status-ok";
+    updateStatus("正常稼働中", "status-ok");
 
-    typeLog(">>> 午前2:13... あなた（テクニカルスタッフⅠ）はR-CCSの夜間オンコール担当だ。");
-    typeLog(">>> 突然、アラート赤色灯が点灯。監視AI（EDR）から通知が入る。");
-    typeLog("<span class='system-alert'>【警告】一般研究者アカウント（東京大学・情報理工）にてアノマリー（異常行動）を検知。当該アカウントはAIにより自動で即時遮断されました。</span>");
-    typeLog(">>> バディのテクニカルスタッフⅡ（若手）がログを持って駆け寄ってきた。\n「先輩！AIが遮断してくれましたが、ログを見ると不自然です。どう指示しますか！？」");
+    typeLog(">>> <b>午前 02:15（深夜）</b>");
+    typeLog(">>> あなた（テクニカルスタッフⅠ）は神戸の理研計算科学研究センター（R-CCS）で夜間当直中だ。");
+    typeLog(">>> 静まり返った管制室に突然、耳を突き刺すアラート音が鳴り響く！");
+    typeLog("<span class='system-alert'>【警告】NDR（ネットワーク異常検知AI）が動作。ある一般利用者の電子鍵を用いたログインにおいて、秒間300回を超える不審なコマンド要求を検知。</span>");
+    typeLog("<span class='highlight-green'>【自動防御】AIの自律権限により、該当アカウント（ID: u_tokyo_sim99）を即座に「一時遮断」しました。</span>");
+    typeLog("\n>>> バディの若手「テクニカルスタッフⅡ」が息を切らせて駆け寄ってくる。");
+    typeLog("スタッフⅡ:「先輩！AIが入り口を閉めてくれましたが、攻撃の意図が読めません。ただの学生がパスワードを間違えたレベルじゃないです。どう指示を出しますか！？」");
 
-    addChoice("1. 「スタッフⅡ、至急そのアカウントの過去3日間の全アクセスログを抽出してくれ」", step1_analyze);
-    addChoice("2. 「大したことないだろ、誤検知じゃないか？ ロックを解除して様子を見よう」", step1_bad_end);
+    addChoice("「焦るな。まずはそのアカウントの『過去1週間のアクセスログ』をすべて抽出。何が目的か洗うんだ」", phase1_analyze);
+    addChoice("「AIが止めたならもう安全だろ。夜明けまでロックしたまま放置して、明日大学に連絡しよう」", phase1_lazy_end);
 }
 
-function step1_bad_end() {
+// 【バッドエンド1】
+function phase1_lazy_end() {
     clearChoices();
-    typeLog("\n>>> あなたはアラートを誤検知と判断し、ロックを解除した。");
-    typeLog("<span class='system-alert'>【破滅】数分後、ハッカーが仕込んでいたステルスプログラムが起動。特権昇格（管理者権限奪取）を実行され、富岳のコアシステムが完全に乗っ取られました。データの海外流出が止まりません。</span>");
-    statusSpan.innerText = "制御不能（ハッキング完了）";
-    statusSpan.className = "status-critical";
+    updateStatus("完全沈黙（ハッキング完了）", "status-critical");
+    typeLog("\n------------------------------------------------------------");
+    typeLog("<span class='system-alert'>【重大なセキュリティインシデント発生】</span>");
+    typeLog(">>> あなたが油断した数分後、ハッカーの真の狙いが発動した。");
+    typeLog("最初のアラートは、監視AIの目を引きつけるための「おとり」だったのだ。ハッカーはAIが一時遮断の処理を行っている隙に、別ルートからシステム内部に侵入。数分で『特権昇格』を果たし、富岳の気象予測シミュレータを完全に乗っ取った。");
+    typeLog("翌朝、あなたは国家機密流出の責任を問われ、懲戒解雇となる…。");
     addChoice("もう一度挑戦する", startGame);
 }
 
-function step1_analyze() {
+function phase1_analyze() {
     clearChoices();
-    typeLog("\n>>> スタッフⅡが猛スピードでキーボードを叩き、ログを解析する。");
-    typeLog("スタッフⅡ:「出ました！このアカウント、深夜1時から数秒おきにシステム内部の脆弱性をスキャンしています。一般学生の動きじゃありません。プロのハッカーが足がかりにしています！」");
-    typeLog("スタッフⅠ（あなた）の直感が告げる。ハッカーはすでに他の『裏口（バックドア）』をシステム内に作っている可能性が高い。どうする？");
+    typeLog("\n>>> あなたの指示で、スタッフⅡがカタカタと高速でログを解析する。");
+    typeLog("スタッフⅡ:「出ました！ ログを解析したところ、この東大のアカウント、過去3日間『深夜2時ちょうど』に、誰も使っていない古いシステムバグを突くような奇妙な信号を送り続けていました。今日のアラートは、その実験の仕上げだったようです！」");
+    typeLog(">>> あなたは冷や汗をかく。これは愉快犯ではない。富岳の脆弱性を調べ尽くしたプロの『ステルス攻撃（APT攻撃）』だ。さらに、ハッカーはすでに他の「裏口（バックドア）」を作って内部に潜伏している可能性が高い。");
 
-    addChoice("1. 「よし、このアカウントが属する大学のネットワークセグメント（区画）を丸ごと物理的に隔離（遮断）する！」", step2_isolate);
-    addChoice("2. 「念のため、センター長を叩き起こして『富岳の全停止』の許可をもらいに行こう」", step2_time_loss);
+    addChoice("「このアカウントが所属する大学の研究室セグメント（ネットワーク区画）を、今すぐ富岳から物理的に強制隔離しろ！」", phase2_isolate);
+    addChoice("「よし、このハッカーの正体を突き止めるため、泳がせて通信を追跡しよう」", phase2_honeypot_end);
 }
 
-function step2_time_loss() {
+// 【バッドエンド2】
+function phase2_honeypot_end() {
     clearChoices();
-    typeLog("\n>>> あなたはセンター長に連絡を取ろうとした。しかし、深夜のため電話がつながるまでに数分間のタイムロスが発生！");
-    typeLog("<span class='system-alert'>【警告】その間にハッカーが『特権昇格』を実行。管理者のIDが偽装され、防衛網をすり抜けようとしています！</span>");
+    updateStatus("汚染拡大中", "status-critical");
+    typeLog("\n------------------------------------------------------------");
+    typeLog("<span class='system-alert'>【判断ミス】</span>");
+    typeLog(">>> 国家のスパコンを相手に『泳がせる』のは危険すぎた。");
+    typeLog("ハッカーは追跡を察知した瞬間、潜伏させていたランサムウェア（身代金要求ウイルス）を一斉に起動。富岳のストレージの一部が暗号化され、明日の国家プロジェクトのデータが破壊された。上層部から「なぜ即座に隔離しなかったのか！」と激怒される事態に。");
+    addChoice("タイムスリップしてやり直す", startGame);
+}
+
+function phase2_isolate() {
+    clearChoices();
+    updateStatus("部分隔離（警戒モード）", "status-warn");
+    typeLog("\n>>> あなたの決断により、汚染された東大の研究室ルートが富岳から「物理遮断」された。");
+    typeLog("スタッフⅡ:「セグメントの強制隔離、完了しました！ ひとまずこのルートからの追加侵入は不可能です！」");
+    typeLog("\n>>> <b>午前 02:40</b>");
+    typeLog(">>> センター内の内線電話が突然鳴る。ディスプレイには「外部連絡：○○大学 教授」の文字。");
+    typeLog("電話をとると、慌てた様子の教授の声がする。");
+    typeLog("教授:『夜分にすまない！ うちの研究室の学生が、SNSで知り合った海外の投資家から「富岳の利用権を1時間貸してくれたら100万円払う」と買収され、電子鍵を渡してしまったらしい！ 本人が泣きながら白状したんだ、どうなっておる！？』");
+    typeLog(">>> やはり人間の「買収」が原因だった！と、その時。中央モニターに新たなアラートが！");
+    typeLog("<span class='system-alert'>【致命的警告】システム最高管理者のID（特権アカウント）が、理研内部の『別の部屋の端末』からログインを要求しています。</span>");
+
+    addChoice("「おかしい、最高管理者の先輩は今夜は自宅で寝ているはずだ！ なりすましだ、全特権アカウントを今すぐ強制ログアウトさせて多要素認証を再要求しろ！」", phase3_stealth);
+    addChoice("「内部の端末からなら安心か。本物の管理者が緊急で入ってきたのかも。そのままログインを通そう」", phase1_lazy_end);
+}
+
+function phase3_stealth() {
+    clearChoices();
+    updateStatus("超厳重警戒（インシデント対応中）", "status-warn");
+    typeLog("\n>>> あなたの機転により、すべての特権アカウントが強制デタッチ（切断）され、再認証の壁が敷かれた。");
+    typeLog(">>> ハッカーは管理者のIDとパスワードを盗み出していたが、研究者のスマホに届く『指紋認証（多要素認証）』を突破できず、一歩手前で締め出された！");
+    typeLog("スタッフⅡ:「防ぎました！ …でも、ハッカーも必死です。あいつらログインを拒否された腹いせに、富岳の外部通信ポートへ向けて大規模なDDoS（大量のゴミデータを送りつける攻撃）を開始しました！ 通信回線がパンクしそうです！」");
+    typeLog(">>> このままでは富岳全体の通信が麻痺し、全国の研究者が富岳を使えなくなる。");
+
+    addChoice("「上級スタッフ（スタッフⅠ）の権限を発動する。外部接続ノードのトラフィックフィルターを緊急書き換え！ DDoSのゴミ通信だけを自動でゴミ箱へ捨てる設定に変更しろ！」", phase4_boss);
+    addChoice("「これ以上の攻撃は危険だ。私の判断で、富岳の電源をすべて切り、システムを全停止（シャットダウン）する！」", phase3_shutdown_end);
+}
+
+// 【バッドエンド3】
+function phase3_shutdown_end() {
+    clearChoices();
+    updateStatus("システム全停止", "status-critical");
+    typeLog("\n------------------------------------------------------------");
+    typeLog("<span class='system-alert'>【権限逸脱による大問題】</span>");
+    typeLog(">>> あなたはパニックになり、富岳のシャットダウンボタンを押そうとした。");
+    typeLog("しかし、スタッフⅡがあなたの手を掴んで止める！\n「先輩ダメです！富岳の全停止は数億円の損失が出るため、センター長（トップ）の決断が必要です！僕たちの役職では権限がありません！」");
+    typeLog("そうこうしているうちに、DDoS攻撃の負荷でセキュリティサーバー自体がダウン。その隙を突いたハッカーに最後の防衛線を突破されてしまった…！");
+    addChoice("もう一度作戦を練り直す", startGame);
+}
+
+function phase4_boss() {
+    clearChoices();
+    typeLog("\n>>> あなたの技術的な即断により、トラフィックフィルターが秒速で書き換えられた！");
+    typeLog(">>> 押し寄せる数テラバイトのゴミデータは、富岳の処理能力に触れる前に、ネットワークの限界点ですべて消滅していく。");
+    typeLog("スタッフⅡ:「フィルター作動！ 通信負荷、80%から12%まで急低下！ 防衛成功です！」");
+    typeLog("\n>>> <b>午前 03:20</b>");
+    typeLog(">>> 静寂を取り戻す管制室。しかし、ログの最終チェックをしていたあなたの目が、恐ろしい1行を見つける。");
+    typeLog("<span class='highlight-blue'>[Log] 02:39:12 /dev/nodes/core_temp --modify-config [Success]</span>");
+    typeLog(">>> ハッカーは通信遮断の直前、富岳本体の「冷却システムの制御プログラム」を書き換えていた。現在、富岳のコア温度が異常上昇中。このままでは超高性能CPU群が熱で物理的に焼き切れる（物理破壊攻撃）！");
+    typeLog("上層部を呼んでいる時間はない。あと30秒で富岳が物理的に壊れる！");
+
+    addChoice("「冷却ファンを強制的に150%の超過駆動（オーバードライブ）に設定！ プログラムを上書きしてバックアップから正常な設定を復元しろ！」", win_perfect);
+    addChoice("「手遅れだ！富岳のメイン電源のブレーカーを物理的に落としに行くぞ！」", phase4_fail_end);
+}
+
+// 【バッドエンド4】
+function phase4_fail_end() {
+    clearChoices();
+    updateStatus("物理的破損", "status-critical");
+    typeLog("\n------------------------------------------------------------");
+    typeLog("<span class='system-alert'>【物理破壊end】</span>");
+    typeLog(">>> あなたは制御室を飛び出し、ブレーカーへ走った。しかし、富岳の広大な敷地の中で、深夜にメインブレーカーまで30秒でたどり着くのは物理的に不可能だった。");
+    typeLog("背後で『ボン…』という鈍い音が響く。国家の至宝であるCPUボードの一部が熱で焼き切れ、修復に数十億円、数ヶ月の期間が必要になってしまった…。");
+    addChoice("もう一度富岳を救いに行く", startGame);
+}
+
+// 【ハッピーエンド：完全勝利】
+function win_perfect() {
+    clearChoices();
+    updateStatus("安全・完全復旧", "status-ok");
+    typeLog("\n------------------------------------------------------------");
+    typeLog("<span class='highlight-green'>【ミッションコンプリート：富岳防衛成功】</span>");
+    typeLog(">>> あなたが修復コマンドを実行した瞬間、冷却システムが凄まじい音を立ててフル稼働を始めた！");
+    typeLog(">>> 画面に表示されるCPU温度が、85℃…70℃…45℃へと急速に下がっていく。正常値だ。");
+    typeLog("\n>>> <b>午前 04:00</b>");
+    typeLog(">>> ログの完全消去、ハッカーのバックドアの全駆除、そして買収された学生のアクセス権剥奪がすべて完了した。");
+    typeLog("スタッフⅡ:「先輩…やりましたね。AIの初動から、ネットワーク隔離、最後の物理熱攻撃への対処まで、完璧な現場指揮でした。テクニカルスタッフⅠの底力、見せてもらいました！」");
+    typeLog("\n>>> 朝、出勤してきたセンター長に報告書を提出すると、肩をポンと叩かれた。");
+    typeLog("センター長:「素晴らしい初動対応だ。君たちが昨夜、日本の科学技術の未来を救ったんだよ」");
+    typeLog("あなたのサイバーセキュリティの知識と冷静な判断が、世界最強のスーパーコンピュータを守り抜いたのだ！");
     
-    addChoice("1. 「手遅れになる前に、上級スタッフの権限で重要データ区画を即座に部分停止する！」", step2_isolate);
-    addChoice("2. 「センター長に繋がるまで待つ！」", step1_bad_end);
-}
-
-function step2_isolate() {
-    clearChoices();
-    statusSpan.innerText = "部分制限（警戒態勢）";
-    statusSpan.className = "status-critical";
-    typeLog("\n>>> あなたの判断で、侵入ルートとなっていたネットワークブロックをシステムから強制切断した！");
-    typeLog(">>> ガガガ…と防壁が展開し、ハッカーの通信が遮断される。");
-    typeLog("スタッフⅡ:「やりました！ハッカーの特権昇格コマンドを間一髪でブロックしました！ 汚染範囲は限定的です！」");
-    typeLog(">>> しかし安心したのも束の間。システムログに『本物の管理者ID』を使った不審なログイン要求が走り始めた。ハッカーは管理者の鍵（セッション）を盗み出し、正規のフリをして入ろうとしている！");
-
-    addChoice("1. 「本物の管理者も含め、今動いている全管理者アカウントを強制ログアウト＆多要素認証を再要求しろ！」", step3_win);
-    addChoice("2. 「本物の管理者なら大丈夫なはずだ。アクセスを許可しよう」", step1_bad_end);
-}
-
-function step3_win() {
-    clearChoices();
-    statusSpan.innerText = "安全（防衛成功）";
-    statusSpan.className = "status-ok";
-    typeLog("\n>>> あなたは全ての管理者アカウントに強制ロックをかけ、スマホによる生体認証の再要求を強制した。");
-    typeLog(">>> ハッカーは正規の鍵を持っていたが、研究者の『指紋』までは偽装できず、完全に締め出された！");
-    typeLog("\n>>> 午前3:45... システムの安全が確認され、ハッカーのバックドアもすべて消去・パッチ適用が完了。");
-    typeLog("スタッフⅡ:「先輩、やりましたね！完璧な初動判断でした！」");
-    typeLog(">>> あなた（テクニカルスタッフⅠ）の迅速な隔離判断と、スタッフⅡの実務連携により、国家の頭脳『富岳』は見事に守られた！");
-    
-    addChoice("防衛成功！もう一度遊ぶ", startGame);
+    addChoice("もう一度最初から遊ぶ", startGame);
 }
 
 // ゲーム開始
